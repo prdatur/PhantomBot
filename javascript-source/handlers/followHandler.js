@@ -35,6 +35,7 @@
             followReward = $.getSetIniDbNumber('settings', 'followReward', 0),
             followMessage = $.getSetIniDbString('settings', 'followMessage', $.lang.get('followhandler.follow.message')),
             followDelay = $.getSetIniDbNumber('settings', 'followDelay', 5),
+            announceOffline = $.getSetIniDbBoolean('settings', 'followAnnounceOffline', true),
             followQueue = new Packages.java.util.concurrent.ConcurrentLinkedQueue,
             lastFollow = $.systemTime(),
             announceFollows = false;
@@ -47,24 +48,27 @@
         followMessage = $.getIniDbString('settings', 'followMessage');
         followToggle = $.getIniDbBoolean('settings', 'followToggle');
         followDelay = $.getIniDbNumber('settings', 'followDelay');
+        announceOffline = $.getIniDbBoolean('settings', 'followAnnounceOffline');
     }
 
     function alertFollow(follower, replay) {
         if (announceFollows && followToggle) {
-            var s = followMessage;
-            if (s.match(/\(name\)/)) {
-                s = $.replace(s, '(name)', $.username.resolve(follower));
-            }
+            if (announceOffline || $.isOnline($.channelName)) {
+                var s = followMessage;
+                if (s.match(/\(name\)/)) {
+                    s = $.replace(s, '(name)', $.username.resolve(follower));
+                }
 
-            if (s.match(/\(reward\)/)) {
-                s = $.replace(s, '(reward)', $.getPointsString(followReward));
-            }
+                if (s.match(/\(reward\)/)) {
+                    s = $.replace(s, '(reward)', $.getPointsString(followReward));
+                }
 
-            if (s.match(/^\/w/)) {
-                s = s.replace('/w', ' /w');
-            }
+                if (s.match(/^\/w/)) {
+                    s = s.replace('/w', ' /w');
+                }
 
-            followQueue.add(s);
+                followQueue.add(s);
+            }
 
             if (followReward > 0 && !replay) {
                 $.inidb.incr('points', follower, followReward);

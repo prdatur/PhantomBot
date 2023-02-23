@@ -65,8 +65,8 @@ $(function () {
     // Follow handler settings.
     $('#followHandlerSettings').on('click', function () {
         socket.getDBValues('alerts_follow_get_settings', {
-            tables: ['settings', 'settings', 'settings', 'settings'],
-            keys: ['followToggle', 'followReward', 'followMessage', 'followDelay']
+            tables: ['settings', 'settings', 'settings', 'settings', 'settings'],
+            keys: ['followToggle', 'followReward', 'followMessage', 'followDelay', 'followAnnounceOffline']
         }, true, function (e) {
             helpers.getModal('follow-alert', 'Follower Alert Settings', 'Save', $('<form/>', {
                 'role': 'form'
@@ -75,6 +75,9 @@ $(function () {
                     .append(helpers.getDropdownGroup('follow-toggle', 'Enable Follow Alerts', (e.followToggle === 'true' ? 'Yes' : 'No'), ['Yes', 'No'],
                             'If a message should be said in the channel when someone follows. This also toggles the reward.'))
                     // Add the the text area for the follow message.
+                    // Add the toggle for follow alerts.
+                    .append(helpers.getDropdownGroup('follow-announce-offline', 'Enable Follow Alerts while offline', (e.followAnnounceOffline === 'true' ? 'Yes' : 'No'), ['Yes', 'No'],
+                        'If a message should be said in the channel when someone follows while the channel is offline. This also toggles the reward.'))
                     .append(helpers.getTextAreaGroup('follow-message', 'text', 'Follow Message', '', e.followMessage,
                             'Message said when someone follows the channel. Tags: (name), (alert), (playsound), and (reward)', false))
                     // Add the the box for the reward.
@@ -85,6 +88,7 @@ $(function () {
                             'Delay between the follow messages posted in the channel. Minimum is 5 seconds.')),
                     function () { // Callback once the user clicks save.
                         let followToggle = $('#follow-toggle').find(':selected').text() === 'Yes',
+                                followAnnounceOffline = $('#follow-announce-offline').val() === 'Yes',
                                 followMessage = $('#follow-message'),
                                 followReward = $('#follow-reward'),
                                 followDelay = $('#follow-delay');
@@ -98,9 +102,9 @@ $(function () {
                             default:
                                 // Update settings.
                                 socket.updateDBValues('alerts_follow_update_settings', {
-                                    tables: ['settings', 'settings', 'settings', 'settings'],
-                                    keys: ['followToggle', 'followReward', 'followMessage', 'followDelay'],
-                                    values: [followToggle, followReward.val(), followMessage.val(), followDelay.val()]
+                                    tables: ['settings', 'settings', 'settings', 'settings', 'settings'],
+                                    keys: ['followToggle', 'followReward', 'followMessage', 'followDelay', 'followAnnounceOffline'],
+                                    values: [followToggle, followReward.val(), followMessage.val(), followDelay.val(), followAnnounceOffline]
                                 }, function () {
                                     socket.sendCommand('alerts_follow_update_settings_cmd', 'followerpanelupdate', function () {
                                         // Close the modal.
